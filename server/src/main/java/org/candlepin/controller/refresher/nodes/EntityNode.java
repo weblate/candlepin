@@ -36,6 +36,41 @@ import java.util.Set;
 public interface EntityNode<E extends AbstractHibernateObject, I extends ServiceAdapterModel> {
 
     /**
+     * The NodeState enum defines the pseudo-states a node can be in as a result of node processing.
+     */
+    public static enum NodeState {
+        /**
+         * The CREATED state represents a node with an imported entity that causes a net-new entity
+         * to be created as a result of the refresh operation
+         */
+        CREATED,
+
+        /**
+         * The UPDATED state represents a node with an existing entity that was updated as a result
+         * of the refresh operation
+         */
+        UPDATED,
+
+        /**
+         * The UNCHANGED state represents a node with an existing entity that was unchanged during
+         * the refresh operation
+         */
+        UNCHANGED,
+
+        /**
+         * The DELETED state represents a node with an existing entity which was deleted as a result
+         * of the refresh operation
+         */
+        DELETED,
+
+        /**
+         * The SKIPPED state represents a node that should not be processed, nor included in the
+         * refresh result
+         */
+        SKIPPED
+    }
+
+    /**
      * Fetches the class of the database model entity mapped by this entity node.
      *
      * @return
@@ -125,21 +160,6 @@ public interface EntityNode<E extends AbstractHibernateObject, I extends Service
     boolean isLeafNode();
 
     /**
-     * Checks if this node has been "visited", indicating that a visitor has processed the node and
-     * marked it as visited.
-     *
-     * @return
-     *  true if this node has been marked as visited; false otherwise
-     */
-    boolean visited();
-
-    /**
-     * Marks this node as visited. If the node has already been marked visited, this method silently
-     * returns.
-     */
-    void markVisited();
-
-    /**
      * Checks if this node represents a new or updated database entity.
      *
      * @return
@@ -148,10 +168,25 @@ public interface EntityNode<E extends AbstractHibernateObject, I extends Service
     boolean changed();
 
     /**
-     * Marks this node as changed. If the node has already been marked changed, this method silently
-     * returns.
+     * Fetches the operation to be performed on this node
+     *
+     * @return
+     *  a NodeState representing the pseudo-state of this node
      */
-    void markChanged();
+    NodeState getNodeState();
+
+    /**
+     * Sets the pseudo-state of this node. If the provided state is null or UNPROCESSED, any
+     * existing state will be cleared, and visitors may treat the node like a new node, potentially
+     * reprocessing it.
+     *
+     * @param state
+     *  the state to assign to this node
+     *
+     * @return
+     *  a reference to this entity node
+     */
+    EntityNode<E, I> setNodeState(NodeState state);
 
     /**
      * Sets the existing database entity for this node. If the provided entity is null, any existing
@@ -218,23 +253,6 @@ public interface EntityNode<E extends AbstractHibernateObject, I extends Service
      *  change
      */
     E getMergedEntity();
-
-    /**
-     * Checks if this entity node represents an update to an existing database entity.
-     *
-     * @return
-     *  true if this entity node represents an update to an existing database entity; false
-     *  otherwise
-     */
-    boolean isEntityUpdate();
-
-    /**
-     * Checks if this entity node represents a new database entity.
-     *
-     * @return
-     *  true if this entity node represents a new database entity; false otherwise
-     */
-    boolean isEntityCreation();
 
     /**
      * Sets the collection of candidate entities for the updated entity of this node. If the

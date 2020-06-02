@@ -117,4 +117,18 @@ public class NodeMapper {
             .iterator();
     }
 
+    /**
+     * Retreives an iterator that steps through all known leaf entity nodes, where a leaf node is
+     * defined as any entity node that has no children nodes. This method never returns null.
+     *
+     * @return
+     *  an iterator to step through all known leaf entity nodes
+     */
+    public Iterator<EntityNode> getLeafIterator() {
+        return this.nodeMap.values()
+            .stream()
+            .flatMap(map -> map.values().stream())
+            .filter(node -> node.isLeafNode())
+            .iterator();
+    }
 }

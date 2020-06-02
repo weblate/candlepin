@@ -272,42 +272,6 @@ public class ProductNodeTest {
     }
 
     @Test
-    public void testVisitedFlagging() {
-        ProductNode node = this.buildProductNode();
-
-        // Initial state should be false
-        assertFalse(node.visited());
-
-        // Marked state should be true
-        node.markVisited();
-        assertTrue(node.visited());
-
-        // Repeating the mark should not reverse state
-        for (int i = 0; i < 5; ++i) {
-            node.markVisited();
-            assertTrue(node.visited());
-        }
-    }
-
-    @Test
-    public void testChangedFlagging() {
-        ProductNode node = this.buildProductNode();
-
-        // Initial state should be false
-        assertFalse(node.changed());
-
-        // Marked state should be true
-        node.markChanged();
-        assertTrue(node.changed());
-
-        // Repeating the mark should not reverse state
-        for (int i = 0; i < 5; ++i) {
-            node.markChanged();
-            assertTrue(node.changed());
-        }
-    }
-
-    @Test
     public void testExistingEntity() {
         ProductNode node = this.buildProductNode();
         Product product = TestUtil.createProduct();
@@ -422,57 +386,4 @@ public class ProductNodeTest {
         assertNull(node.getCandidateEntities());
     }
 
-    @Test
-    public void testIsEntityUpdate() {
-        ProductNode node1 = this.buildProductNode();
-        ProductNode node2 = this.buildProductNode();
-
-        Product existing = TestUtil.createProduct();
-        ProductInfo imported = TestUtil.createProduct();
-
-        // Initial state should be false
-        assertFalse(node1.isEntityUpdate());
-        assertFalse(node2.isEntityUpdate());
-
-        // An existing or imported entity alone is not enough to be considered an update
-        node1.setExistingEntity(existing);
-        node2.setImportedEntity(imported);
-
-        assertFalse(node1.isEntityUpdate());
-        assertFalse(node2.isEntityUpdate());
-
-        // Having both existing and imported entities present is a flag for update
-        node1.setImportedEntity(imported);
-        node2.setExistingEntity(existing);
-
-        assertTrue(node1.isEntityUpdate());
-        assertTrue(node2.isEntityUpdate());
-    }
-
-    @Test
-    public void testIsEntityCreation() {
-        ProductNode node1 = this.buildProductNode();
-        ProductNode node2 = this.buildProductNode();
-
-        Product existing = TestUtil.createProduct();
-        ProductInfo imported = TestUtil.createProduct();
-
-        // Initial state should be false
-        assertFalse(node1.isEntityCreation());
-        assertFalse(node2.isEntityCreation());
-
-        // A creation is defined as an import without an existing
-        node1.setExistingEntity(existing);
-        node2.setImportedEntity(imported);
-
-        assertFalse(node1.isEntityCreation());
-        assertTrue(node2.isEntityCreation());
-
-        // Having both is an update, not a creation
-        node1.setImportedEntity(imported);
-        node2.setExistingEntity(existing);
-
-        assertFalse(node1.isEntityCreation());
-        assertFalse(node2.isEntityCreation());
-    }
 }
